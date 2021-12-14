@@ -26,11 +26,11 @@ playing of chords, but with a slow release envelope and the playing of arpeggios
 ## Demos
 
 - mozziscout_poly:
-- 
+
 https://user-images.githubusercontent.com/274093/145919492-d7a09c77-17af-4bb8-a2b9-0461dc5f6cd3.mp4
 
 - mozziscout_thx:
-- 
+ 
 https://user-images.githubusercontent.com/274093/145919518-16e2b630-6e01-47f0-af7d-57828377f685.mp4
 
 
