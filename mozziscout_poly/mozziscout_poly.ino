@@ -141,9 +141,5 @@ AudioOutput_t updateAudio() {
     //    asig += myOscs[i].next();
     asig += myOscs[i].next() * myEnvs[i].next();
   }
-  return MonoOutput::fromAlmostNBit(20, asig); // 11-bits for 5 voices
-  //  return MonoOutput::fromAlmostNBit(11, asig); // 11-bits for 5 voices
+  return MonoOutput::fromAlmostNBit(20, asig);
 }
-
-// 26 bits = 8 bits envelope + 18 bits signal
-// return MonoOutput::fromAlmostNBit(26, envelope.next() * asig);
