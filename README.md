@@ -27,12 +27,13 @@ playing of chords, but with a slow release envelope and the playing of arpeggios
 
 - mozziscout_poly:
 
+https://user-images.githubusercontent.com/274093/145933351-45c38eea-6b29-4ec0-b800-44b9021e631d.mp4
+
 https://user-images.githubusercontent.com/274093/145919492-d7a09c77-17af-4bb8-a2b9-0461dc5f6cd3.mp4
 
 - mozziscout_thx:
  
-https://user-images.githubusercontent.com/274093/145919518-16e2b630-6e01-47f0-af7d-57828377f685.mp4
-
+https://user-images.githubusercontent.com/274093/145933155-d71aab6e-c19b-4d4a-ba7b-1610026e639d.mp4
 
 
 
