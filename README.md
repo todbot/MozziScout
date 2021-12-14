@@ -19,6 +19,7 @@ This repo shows some exmaples of using Mozzi on Scout, along with the small mod 
 * [How to mod your Scout](#how-to-mod-your-scout)
 * [Using normal Scout code](#using-normal-scout-code)
 * [How to install Mozzi](#how-to-install-mozzi)
+* [Using Mozzi](#using-mozzi)
 * [Any questions?](#any-questions)
 
 
@@ -37,13 +38,11 @@ playing of chords, but with a slow release envelope and the playing of arpeggios
 
 ## Demos
 
-- mozziscout_poly:
+* "mozziscout_poly" - Turn Scout into a polyphonic synth, sort of
+  <video controls src="https://user-images.githubusercontent.com/274093/145933351-45c38eea-6b29-4ec0-b800-44b9021e631d.mp4"></video>
 
-https://user-images.githubusercontent.com/274093/145933351-45c38eea-6b29-4ec0-b800-44b9021e631d.mp4
-
-- mozziscout_thx:
- 
-https://user-images.githubusercontent.com/274093/145933155-d71aab6e-c19b-4d4a-ba7b-1610026e639d.mp4
+* "mozziscout_thx" - Make your Scout do THX Deep Note, sort of
+  <video controls src="https://user-images.githubusercontent.com/274093/145933155-d71aab6e-c19b-4d4a-ba7b-1610026e639d.mp4"></video>
 
 
 ## How to mod your Scout
@@ -91,6 +90,13 @@ then click "Download ZIP".
 - Once it completes, you will see Mozzi in the list of available libraries and the Mozzi examples
 in "File" -> "Examples" -> "Mozzi".  Many of the examples will work with Scout but not use the keyboard.
 
+
+## Using Mozzi
+
+- Mozzi is very particular about what is in `loop()`. Do not put anything else in there.
+  Instead put it in the `void updateControl()` function. See the sketches for examples.
+- Mozzi output is quieter than standard Scout (which outputs full-width square waves).
+  Use an external amp for best results.
 
 ## Any questions?
 
