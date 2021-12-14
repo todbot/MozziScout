@@ -10,7 +10,7 @@ that can do multi-oscillator synthesis with filters and modulation on even an Ar
 [Oskiton Scout](https://oskitone.github.io/scout/) is an adorable tiny keyboard kit that is
 based on an Arduino Uno.
 
-This repo shows some exmaples of using Mozzi on Scout, along with the small mod needed to make it work.
+This repo shows some examples of using Mozzi on Scout, along with the small mod needed to make it work.
 
 ## Table of contents
 
