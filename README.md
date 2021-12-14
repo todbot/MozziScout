@@ -10,7 +10,6 @@ based on an Arduino Uno.
 
 This repo shows some exmaples of using Mozzi on Scout, along with the small mod needed to make it work.
 
-
 ## Sketches
 
 - [mozziscout](mozziscout/) - a straight-forward Mozzi version of the 'scout' sketch that comes on Scout
@@ -29,13 +28,9 @@ playing of chords, but with a slow release envelope and the playing of arpeggios
 
 https://user-images.githubusercontent.com/274093/145933351-45c38eea-6b29-4ec0-b800-44b9021e631d.mp4
 
-https://user-images.githubusercontent.com/274093/145919492-d7a09c77-17af-4bb8-a2b9-0461dc5f6cd3.mp4
-
 - mozziscout_thx:
  
 https://user-images.githubusercontent.com/274093/145933155-d71aab6e-c19b-4d4a-ba7b-1610026e639d.mp4
-
-
 
 ## How to mod your Scout
 
