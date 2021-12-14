@@ -13,12 +13,14 @@ based on an Arduino Uno.
 This repo shows some exmaples of using Mozzi on Scout, along with the small mod needed to make it work.
 
 ## Table of contents
+
 * [Sketches](#sketches)
 * [Demos](#demos)
 * [How to mod your Scout](#how-to-mod-your-scout)
 * [Using normal Scout code](#using-normal-scout-code)
 * [How to install Mozzi](#how-to-install-mozzi)
 * [Any questions?](#any-questions)
+
 
 ## Sketches
 
@@ -32,13 +34,12 @@ playing of chords, but with a slow release envelope and the playing of arpeggios
 
 - [mozziscout_thx](mozziscout_thx/) - an eight-oscillator stacked sound where the oscillators start at a random pitch and slowly converge to a chord. Vagugely based on [THX Deep Note](https://en.wikipedia.org/wiki/Deep_Note)
 
+
 ## Demos
 
 - mozziscout_poly:
 
 https://user-images.githubusercontent.com/274093/145933351-45c38eea-6b29-4ec0-b800-44b9021e631d.mp4
-
-https://user-images.githubusercontent.com/274093/145919492-d7a09c77-17af-4bb8-a2b9-0461dc5f6cd3.mp4
 
 - mozziscout_thx:
  
@@ -59,6 +60,7 @@ One way two swap this is where the two legs of the ATmega328 chip are lifted,
 and jumper wires are soldered on and plugged into the socket, as in the photo below.
 
 <img src="./docs/mozziscout_pins.jpg" />
+
 
 ## Using normal Scout code
 
