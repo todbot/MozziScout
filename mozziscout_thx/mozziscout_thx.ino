@@ -63,9 +63,9 @@ void setup() {
   blink();
 
   envelope.setADLevels(255, 255);
-  envelope.setTimes(350, 200, 20000, 100); // 20000 is so the note will sustain 20 seconds unless a noteOff comes
+  envelope.setTimes(500, 200, 20000, 300); // 20000 is so the note will sustain 20 seconds unless a noteOff comes
   for( int i=0; i<NUM_VOICES; i++) {
-    portamentos[i].setTime(1000u + i*1000u); // notes later in chord_notes take longer
+    portamentos[i].setTime(1000u + i*1100u); // notes later in chord_notes take longer
     portamentos[i].start((byte)(note_offset + random(-12, 12)));
   }
   startMozzi(); // start with default control rate of 64
