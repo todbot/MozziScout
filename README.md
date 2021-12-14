@@ -26,16 +26,12 @@ playing of chords, but with a slow release envelope and the playing of arpeggios
 ## Demos
 
 - mozziscout_poly:
-
-<video width="720" controls>
-<source src="./docs/mozziscout_poly_demo1_720p.mp4" type="video/mp4">
-</video>
+- 
+https://user-images.githubusercontent.com/274093/145919492-d7a09c77-17af-4bb8-a2b9-0461dc5f6cd3.mp4
 
 - mozziscout_thx:
-
-<video width="720" controls>
-<source src="./docs/mozziscout_thx_demo1_720p.mp4" type="video/mp4">
-</video>
+- 
+https://user-images.githubusercontent.com/274093/145919518-16e2b630-6e01-47f0-af7d-57828377f685.mp4
 
 
 
