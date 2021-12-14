@@ -18,9 +18,10 @@
 // SETTINGS
 #define NUM_VOICES 8
 int octave = 2;
-int chord_notes[] = {0,5,12,19,-12, 7,9,12,5,0 };
-//int chord_notes[] = {0,3,7,10,14};
+int chord_notes[] = {0,5,12,19, -12,7,9,12 };
+//int chord_notes[] = {0,3,7,10, 14,-12,0,12};
 
+// Set up keyboard
 const byte ROWS = 4;
 const byte COLS = 5;
 byte key_indexes[ROWS][COLS] = { // note this goes from 1-17, 0 is undefined
@@ -34,16 +35,15 @@ byte colPins[COLS] = {2, 3, 4, 5, 6};
 
 Keypad keys = Keypad(makeKeymap(key_indexes), rowPins, colPins, ROWS, COLS);
 
-#define CONTROL_RATE 64
-
 // oscillators
 Oscil<TRIANGLE2048_NUM_CELLS, AUDIO_RATE> oscs [NUM_VOICES] = 
   Oscil<TRIANGLE2048_NUM_CELLS, AUDIO_RATE>(TRIANGLE2048_DATA);
-
+// envelope for overall volume
 ADSR <CONTROL_RATE, AUDIO_RATE> envelope;
+// portamentos to slide the pitch around
 Portamento <CONTROL_RATE> portamentos[NUM_VOICES];
 
-byte note_offset = 60 + (octave*12) - 36; // FIXME
+byte note_offset = 48 + (octave*12) - 36; // FIXME
 
 void blink(int count = 2, int wait = 200) {
   while (count >= 0) {
@@ -62,19 +62,21 @@ void setup() {
 
   blink();
 
-  envelope.setADLevels(255, 64);
-  envelope.setTimes(350, 200, 20000, 1000); // 20000 is so the note will sustain 20 seconds unless a noteOff comes
+  envelope.setADLevels(255, 255);
+  envelope.setTimes(350, 200, 20000, 100); // 20000 is so the note will sustain 20 seconds unless a noteOff comes
   for( int i=0; i<NUM_VOICES; i++) {
-    portamentos[i].setTime(1000u + i*1000u);
+    portamentos[i].setTime(1000u + i*1000u); // notes later in chord_notes take longer
     portamentos[i].start((byte)(note_offset + random(-12, 12)));
   }
   startMozzi(); // start with default control rate of 64
 }
 
+//
 void loop() {
-  audioHook(); // required here
+  audioHook(); // required here, don't put anything else in loop
 }
 
+// Keymap key event callback
 void keypadEvent(KeypadEvent key) {
   byte note = note_offset + key; 
   
@@ -84,8 +86,9 @@ void keypadEvent(KeypadEvent key) {
   // show up as IDLE events instead. sigh.
   switch (keys.getState()) {
     case PRESSED:
-    case HOLD:
+    case HOLD:      
       Serial.print((byte)key); Serial.println(" press");
+      digitalWrite(LED_BUILTIN, HIGH);
       for(int i=0; i<NUM_VOICES; i++) { 
         portamentos[i].start((byte)(note + chord_notes[i]));      
       }
@@ -94,6 +97,7 @@ void keypadEvent(KeypadEvent key) {
       
     case RELEASED:
     case IDLE:
+      digitalWrite(LED_BUILTIN, LOW);
       Serial.print((byte)key); Serial.println(" released or idle");
       envelope.noteOff();
       for(int i=0; i<NUM_VOICES; i++) {
@@ -103,6 +107,7 @@ void keypadEvent(KeypadEvent key) {
   }
 }
 
+// Mozzi function to update control-rate things like LFOs & envelopes
 void updateControl() {
   keys.getKeys();
 
@@ -113,11 +118,12 @@ void updateControl() {
   }
 }
 
+// Mozzi function to update audio
 AudioOutput_t updateAudio() {
   long asig = (long) 0;
   for( int i=0; i<NUM_VOICES; i++) {
     asig += oscs[i].next();    
   }
-  // 26 bits = 8 bits envelope + 18 bits signal
+  // 19 = 8 bits signal * 8 bits envelope = 16 bits + exp(NUM_VOICES,1/2) 
   return MonoOutput::fromAlmostNBit(19, envelope.next() * asig);
 }
