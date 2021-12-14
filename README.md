@@ -37,6 +37,8 @@ However Scout uses the 8-bit Timer2 on pin 9. It's not easy to swap these two fu
 
 So to make Scout work with Mozzi, swap the functions of pins 9 & 11 physically!
 Pin 9 is normally hooked up to the keyboard. Pin 11 is normally the audio out.
+Arduino pins 9 & 11 are ATmega328 pins 15 & 17. (Pin 15  is thebottom-right pin if looking down on it, and Pin 17 is two up from that)
+
 One way two swap this is where the two legs of the ATmega328 chip are lifted,
 and jumper wires are soldered on and plugged into the socket, as in the photo below.
 
