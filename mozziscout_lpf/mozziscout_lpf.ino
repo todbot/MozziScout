@@ -1,6 +1,13 @@
 /**
  * MozziScout wubwubwub synth using LowPassFilter16
- * based on Mozzi example "LowPassFilter"
+ * based a little on Mozzi example "LowPassFilter"
+ * 
+ * This sketch has startup modes!  
+ * Hold a key on power up to change behavior:
+ * - Hold low C for slow filter mod
+ * - Hold low C# for even slower filter mod
+ * - Hold low D for even SLOWER filter mod
+ * - Hold low F to change wave from Saw to Triangle
  *
  * MozziScout is just like normal Scout,
  *  but pins 9 & 11 are swapped, so we can use Mozzi
@@ -110,8 +117,9 @@ void updateControl(){
 }
 
 AudioOutput_t updateAudio(){
-  int asig = lpf.next( aOsc1.next() + aOsc2.next() );
-  return MonoOutput::fromAlmostNBit(10,asig); // need extra bits because filter reasonance
+  long asig = lpf.next( aOsc1.next() + aOsc2.next() );
+  return MonoOutput::fromAlmostNBit(18,envelope.next() * asig); // need extra bits because filter reasonance
+//  return MonoOutput::fromAlmostNBit(10,asig); // need extra bits because filter reasonance
 }
 
 // Keymap key event callback
@@ -131,11 +139,11 @@ void keypadEvent(KeypadEvent key) {
       envelope.noteOn();
       break;     
     case RELEASED:
+      Serial.print("Release ");
     case IDLE:
       digitalWrite(LED_BUILTIN, LOW);
       Serial.print((byte)key); Serial.println(" released or idle");
       envelope.noteOff();
       break;
   }
-  Serial.print(cutoff); Serial.print(":::"); Serial.println(cutoff + (kFilterMod.next() * 64));
 }
