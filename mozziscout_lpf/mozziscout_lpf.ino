@@ -16,7 +16,7 @@
 #include <tables/saw_analogue512_int8.h>
 #include <tables/cos2048_int8.h> // for filter modulation
 #include <LowPassFilter.h>
-#include <mozzi_rand.h>
+#include <ADSR.h>
 #include <mozzi_midi.h> // for mtof()
 #include <Keypad.h>
 
@@ -40,52 +40,25 @@ byte rowPins[ROWS] = {7, 8, 11, 10}; // MozziScout: note pin 11 instead on 9 her
 byte colPins[COLS] = {2, 3, 4, 5, 6};
 Keypad keys = Keypad(makeKeymap(key_indexes), rowPins, colPins, ROWS, COLS);
 
-// pick one
-Oscil<SAW_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aCrunchySound(SAW_ANALOGUE512_DATA);
+// 
+Oscil<SAW_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aOsc1(SAW_ANALOGUE512_DATA);
+Oscil<SAW_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aOsc2(SAW_ANALOGUE512_DATA);
 //Oscil<TRIANGLE_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aCrunchySound(TRIANGLE_ANALOGUE512_DATA);
 //Oscil<SQUARE_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aCrunchySound(SQUARE_ANALOGUE512_DATA);
 Oscil<COS2048_NUM_CELLS, CONTROL_RATE> kFilterMod(COS2048_DATA);
+ADSR <CONTROL_RATE, AUDIO_RATE> envelope;
 
-LowPassFilter16 lpf;
+LowPassFilter lpf;
 
-uint16_t resonance = 48000; // range 0-65535, 65535 is most resonant
+uint8_t resonance = 187; // range 0-255, 255 is most resonant
+uint8_t cutoff = 59;     // range 0-255, corresponds to 0-8192 Hz
 byte startup_mode = 0;
 bool retrig_lfo = true;
-
-void setup(){
-  Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
-  keys.addEventListener(keypadEvent); // Add an event listener for this keypad
-
-  startMozzi();
-  aCrunchySound.setFreq( mtof(note_offset+1) );
-  kFilterMod.setFreq(4.0f);  // fast
-}
-
-void loop(){
-  audioHook();
-}
-
-void updateControl(){
-  keys.getKeys();
-//  if (rand(CONTROL_RATE/2) == 0){ // about once every half second
-//    kFilterMod.setFreq((float)rand(255)/64);  // choose a new modulation frequency
-//  }
-  // map the lpf modulation into the filter range (0-255), corresponds with 0-8191Hz
-  // map the lpf16 modulation into the filter range (0-65535), corresponds with 0-8191Hz
-  uint16_t cutoff_freq = 10000 + (kFilterMod.next() * 64);
-  lpf.setCutoffFreqAndResonance(cutoff_freq, resonance);
-}
-
-AudioOutput_t updateAudio(){
-  int asig = lpf.next(aCrunchySound.next());
-  return MonoOutput::fromAlmostNBit(10,asig); // need extra bits because filter reasonance
-}
 
 // allow some simple parameter changing based on keys
 // pressed on startup
 void handleModeChange(byte m) {
-  startup_mode = m;
+  Serial.print("mode change:"); Serial.println((byte)m);
   if( startup_mode == 1 ) {       // lowest C held
     kFilterMod.setFreq(0.5f);     // slow
   }
@@ -93,9 +66,52 @@ void handleModeChange(byte m) {
     kFilterMod.setFreq(0.25f);    // slower
     retrig_lfo = false;
   }
+  else if( startup_mode == 3 ) {   // lowest D held
+   kFilterMod.setFreq(0.05f);      // offish, almost no mod
+   cutoff = 78;
+  }
+  else if( startup_mode == 6 ) { 
+   aOsc1.setTable(TRIANGLE_ANALOGUE512_DATA);
+   aOsc2.setTable(TRIANGLE_ANALOGUE512_DATA);
+   cutoff = 65;
+  }
   else {                          // no keys held
     kFilterMod.setFreq(4.0f);     // fast    
   }
+}
+
+void setup(){
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+  keys.addEventListener(keypadEvent); // Add an event listener for this keypad
+  
+  startMozzi();
+  //aOsc1.setFreq( mtof(note_offset+1) );
+  lpf.setCutoffFreqAndResonance(cutoff, resonance);
+  kFilterMod.setFreq(4.0f);  // fast
+  envelope.setADLevels(255, 255);
+  envelope.setTimes(100, 200, 20000, 500);
+
+  delay(100);  // wait for key debounce time to expire
+  startup_mode = keys.getKey();
+  handleModeChange(startup_mode);
+ }
+
+void loop(){
+  audioHook();
+}
+
+void updateControl(){
+  keys.getKeys();
+  // map the lpf modulation into the filter range (0-255), corresponds with 0-8191Hz
+  uint8_t cutoff_freq = cutoff + (kFilterMod.next()/4);
+  lpf.setCutoffFreqAndResonance(cutoff_freq, resonance);
+  envelope.update();
+}
+
+AudioOutput_t updateAudio(){
+  int asig = lpf.next( aOsc1.next() + aOsc2.next() );
+  return MonoOutput::fromAlmostNBit(10,asig); // need extra bits because filter reasonance
 }
 
 // Keymap key event callback
@@ -103,21 +119,23 @@ void keypadEvent(KeypadEvent key) {
   byte note = note_offset + key;
   switch (keys.getState()) {
     case PRESSED:
-      if( millis() < 1500 ) { handleModeChange(key); } // FIXME: how to do this in setup()
       if( retrig_lfo ) { 
         kFilterMod.setPhase(0); // only retrigger LFO phase on new press
       }
+      // no break, continue on to setFreq()
     case HOLD:
-      Serial.print(" mode:"); Serial.print((byte)startup_mode); Serial.print(" ");
       Serial.print((byte)key); Serial.println(" presssed/hold");
       digitalWrite(LED_BUILTIN, HIGH);
-      aCrunchySound.setFreq( mtof(note) );
-      break;
-      
+      aOsc1.setFreq( mtof(note) );
+      aOsc2.setFreq( (float)(mtof(note) * 1.01) );
+      envelope.noteOn();
+      break;     
     case RELEASED:
     case IDLE:
       digitalWrite(LED_BUILTIN, LOW);
       Serial.print((byte)key); Serial.println(" released or idle");
+      envelope.noteOff();
       break;
   }
+  Serial.print(cutoff); Serial.print(":::"); Serial.println(cutoff + (kFilterMod.next() * 64));
 }
