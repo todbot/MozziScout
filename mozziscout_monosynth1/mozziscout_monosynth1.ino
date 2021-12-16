@@ -24,14 +24,16 @@
 #include <tables/cos2048_int8.h> // for filter modulation
 #include <LowPassFilter.h>
 #include <ADSR.h>
+#include <Portamento.h>
 #include <mozzi_midi.h> // for mtof()
+
 #include <Keypad.h>
 
 // SETTINGS
-#define NUM_VOICES 8
 int octave = 2;
-int chord_notes[] = {0, 5, 12, 19, -12, 7, 9, 12 };
-//int chord_notes[] = {0,3,7,10, 14,-12,0,12};
+int portamento_time = 50;  // milliseconds
+int env_release_time = 1000; // milliseconds
+
 byte note_offset = 48 + (octave * 12) - 36; // FIXME
 
 // Set up keyboard
@@ -55,6 +57,7 @@ Oscil<SAW_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aOsc2(SAW_ANALOGUE512_DATA);
 Oscil<COS2048_NUM_CELLS, CONTROL_RATE> kFilterMod(COS2048_DATA); // filter mod
 
 ADSR <CONTROL_RATE, AUDIO_RATE> envelope;
+Portamento <CONTROL_RATE> portamento;
 LowPassFilter lpf;
 
 uint8_t resonance = 187; // range 0-255, 255 is most resonant
@@ -71,8 +74,9 @@ void setup() {
   lpf.setCutoffFreqAndResonance(cutoff, resonance);
   kFilterMod.setFreq(4.0f);  // fast
   envelope.setADLevels(255, 255);
-  envelope.setTimes(100, 200, 20000, 1000);
-  
+  envelope.setTimes(100, 200, 20000, env_release_time);
+  portamento.setTime( portamento_time );
+
 }
 
 void loop() {
@@ -81,16 +85,20 @@ void loop() {
 
 void updateControl() {
   scanKeys();
+  
   // map the lpf modulation into the filter range (0-255), corresponds with 0-8191Hz
   uint8_t cutoff_freq = cutoff + (kFilterMod.next() / 4);
   lpf.setCutoffFreqAndResonance(cutoff_freq, resonance);
   envelope.update();
+  Q16n16 pf = portamento.next();
+  aOsc1.setFreq_Q16n16(pf);
+  aOsc2.setFreq_Q16n16(pf*1.01); // hmm, feels like this shouldn't work
+
 }
 
 AudioOutput_t updateAudio() {
   long asig = lpf.next( aOsc1.next() + aOsc2.next() );
   return MonoOutput::fromNBit(16, envelope.next() * asig);
-//  return MonoOutput::fromAlmostNBit(18, envelope.next() * asig); // need 2 extra bits because filter resonance
 }
 
 void scanKeys() {
@@ -104,8 +112,9 @@ void scanKeys() {
       byte note = note_offset + key;
       Serial.print((byte)key); Serial.println(" presssed/hold");
       digitalWrite(LED_BUILTIN, HIGH);
-      aOsc1.setFreq( mtof(note) );
-      aOsc2.setFreq( (float)(mtof(note) * 1.01) );
+      portamento.start(note);
+//      aOsc1.setFreq( mtof(note) ); // old way of direct set, now use portamento
+//      aOsc2.setFreq( (float)(mtof(note) * 1.01) );
       envelope.noteOn();
     }
     else if( kstate == RELEASED ) { 
