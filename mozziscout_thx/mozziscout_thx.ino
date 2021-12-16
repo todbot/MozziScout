@@ -8,8 +8,9 @@
 */
 #include <MozziGuts.h>
 #include <Oscil.h> // oscillator template
-#include <tables/cos8192_int8.h>
-#include <tables/triangle2048_int8.h>
+#include <tables/triangle_analogue512_int8.h>
+#include <tables/square_analogue512_int8.h>
+#include <mozzi_rand.h> // for rand()
 #include <mozzi_midi.h> // for mtof()
 #include <ADSR.h>
 #include <Portamento.h>
@@ -20,6 +21,7 @@
 int octave = 2;
 int chord_notes[] = {0,5,12,19, -12,7,9,12 };
 //int chord_notes[] = {0,3,7,10, 14,-12,0,12};
+byte note_offset = 48 + (octave*12) - 36; // FIXME
 
 // Set up keyboard
 const byte ROWS = 4;
@@ -32,41 +34,28 @@ byte key_indexes[ROWS][COLS] = { // note this goes from 1-17, 0 is undefined
 };
 byte rowPins[ROWS] = {7, 8, 11, 10}; // MozziScout: note pin 11 instead on 9 here
 byte colPins[COLS] = {2, 3, 4, 5, 6};
-
 Keypad keys = Keypad(makeKeymap(key_indexes), rowPins, colPins, ROWS, COLS);
 
 // oscillators
-Oscil<TRIANGLE2048_NUM_CELLS, AUDIO_RATE> oscs [NUM_VOICES] = 
-  Oscil<TRIANGLE2048_NUM_CELLS, AUDIO_RATE>(TRIANGLE2048_DATA);
+Oscil<TRIANGLE_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aOscs [NUM_VOICES] = 
+  Oscil<SQUARE_ANALOGUE512_NUM_CELLS, AUDIO_RATE>(SQUARE_ANALOGUE512_DATA);
+
 // envelope for overall volume
 ADSR <CONTROL_RATE, AUDIO_RATE> envelope;
+
 // portamentos to slide the pitch around
 Portamento <CONTROL_RATE> portamentos[NUM_VOICES];
-
-byte note_offset = 48 + (octave*12) - 36; // FIXME
-
-void blink(int count = 2, int wait = 200) {
-  while (count >= 0) {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(wait);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(wait);
-    count = count - 1;
-  }
-}
 
 void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   keys.addEventListener(keypadEvent); // Add an event listener for this keypad
 
-  blink();
-
   envelope.setADLevels(255, 255);
-  envelope.setTimes(500, 200, 20000, 300); // 20000 is so the note will sustain 20 seconds unless a noteOff comes
+  envelope.setTimes(300, 200, 20000, 300); // 20000 is so the note will sustain 20 seconds unless a noteOff comes
   for( int i=0; i<NUM_VOICES; i++) {
     portamentos[i].setTime(1000u + i*1100u); // notes later in chord_notes take longer
-    portamentos[i].start((byte)(note_offset + random(-12, 12)));
+    portamentos[i].start((byte)(note_offset + random(-18, 18)));
   }
   startMozzi(); // start with default control rate of 64
 }
@@ -90,7 +79,10 @@ void keypadEvent(KeypadEvent key) {
       Serial.print((byte)key); Serial.println(" press");
       digitalWrite(LED_BUILTIN, HIGH);
       for(int i=0; i<NUM_VOICES; i++) { 
-        portamentos[i].start((byte)(note + chord_notes[i]));      
+        // "normal version that makes sense"
+        //portamentos[i].start((byte)(note + chord_notes[i]));
+        // "harder version that adds slight randomness to pitches"
+        portamentos[i].start(Q8n0_to_Q16n16(note + chord_notes[i]) + Q7n8_to_Q15n16(rand(100)));
       }
       envelope.noteOn();
       break;
@@ -101,7 +93,7 @@ void keypadEvent(KeypadEvent key) {
       Serial.print((byte)key); Serial.println(" released or idle");
       envelope.noteOff();
       for(int i=0; i<NUM_VOICES; i++) {
-        portamentos[i].start((byte)(note_offset + random(-12, 12)));        
+        portamentos[i].start((byte)(note_offset + random(-18, 18)));        
       }
       break;
   }
@@ -114,7 +106,7 @@ void updateControl() {
   envelope.update();
 
   for( int i=0; i<NUM_VOICES; i++) {
-    oscs[i].setFreq_Q16n16(portamentos[i].next());
+    aOscs[i].setFreq_Q16n16(portamentos[i].next());
   }
 }
 
@@ -122,8 +114,8 @@ void updateControl() {
 AudioOutput_t updateAudio() {
   long asig = (long) 0;
   for( int i=0; i<NUM_VOICES; i++) {
-    asig += oscs[i].next();    
+    asig += aOscs[i].next();
   }
   // 19 = 8 bits signal * 8 bits envelope = 16 bits + exp(NUM_VOICES,1/2) 
-  return MonoOutput::fromAlmostNBit(19, envelope.next() * asig);
+  return MonoOutput::fromNBit(19, envelope.next() * asig);
 }
