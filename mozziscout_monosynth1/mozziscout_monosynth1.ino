@@ -89,7 +89,8 @@ void updateControl() {
 
 AudioOutput_t updateAudio() {
   long asig = lpf.next( aOsc1.next() + aOsc2.next() );
-  return MonoOutput::fromAlmostNBit(18, envelope.next() * asig); // need 2 extra bits because filter resonance
+  return MonoOutput::fromNBit(16, envelope.next() * asig); // need 2 extra bits because filter resonance
+//  return MonoOutput::fromAlmostNBit(18, envelope.next() * asig); // need 2 extra bits because filter resonance
 }
 
 void scanKeys() {
@@ -109,6 +110,7 @@ void scanKeys() {
     }
     else if( kstate == RELEASED ) { 
       Serial.print((byte)key); Serial.println(" released");
+      digitalWrite(LED_BUILTIN, LOW);
       envelope.noteOff();
     }
     else {
