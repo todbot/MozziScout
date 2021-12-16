@@ -8,6 +8,7 @@
    - Hold low C# for even slower filter mod
    - Hold low D for even SLOWER filter mod
    - Hold low F to change wave from Saw to Triangle
+   - Hold low F# to change wave from Saw to Square
 
    MozziScout is just like normal Scout,
     but pins 9 & 11 are swapped, so we can use Mozzi
@@ -31,6 +32,9 @@
 
 // SETTINGS
 int octave = 2;
+float mod_amount = 0.5;
+uint8_t resonance = 187; // range 0-255, 255 is most resonant
+uint8_t cutoff = 59;     // range 0-255, corresponds to 0-8192 Hz
 int portamento_time = 50;  // milliseconds
 int env_release_time = 1000; // milliseconds
 
@@ -52,16 +56,13 @@ Keypad keys = Keypad(makeKeymap(key_indexes), rowPins, colPins, ROWS, COLS);
 //
 Oscil<SAW_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aOsc1(SAW_ANALOGUE512_DATA);
 Oscil<SAW_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aOsc2(SAW_ANALOGUE512_DATA);
-//Oscil<TRIANGLE_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aOsc1(TRIANGLE_ANALOGUE512_DATA);
-//Oscil<SQUARE_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aOsc1(SQUARE_ANALOGUE512_DATA);
+
 Oscil<COS2048_NUM_CELLS, CONTROL_RATE> kFilterMod(COS2048_DATA); // filter mod
 
 ADSR <CONTROL_RATE, AUDIO_RATE> envelope;
 Portamento <CONTROL_RATE> portamento;
 LowPassFilter lpf;
 
-uint8_t resonance = 187; // range 0-255, 255 is most resonant
-uint8_t cutoff = 59;     // range 0-255, corresponds to 0-8192 Hz
 byte startup_mode = 0;
 bool retrig_lfo = true;
 
@@ -85,14 +86,13 @@ void loop() {
 
 void updateControl() {
   scanKeys();
-  
   // map the lpf modulation into the filter range (0-255), corresponds with 0-8191Hz
-  uint8_t cutoff_freq = cutoff + (kFilterMod.next() / 4);
+  uint8_t cutoff_freq = cutoff + (mod_amount * (kFilterMod.next()/2));
   lpf.setCutoffFreqAndResonance(cutoff_freq, resonance);
   envelope.update();
   Q16n16 pf = portamento.next();
   aOsc1.setFreq_Q16n16(pf);
-  aOsc2.setFreq_Q16n16(pf*1.01); // hmm, feels like this shouldn't work
+  aOsc2.setFreq_Q16n16(pf*1.02); // hmm, feels like this shouldn't work
 
 }
 
@@ -148,6 +148,12 @@ void handleModeChange(byte m) {
     aOsc1.setTable(TRIANGLE_ANALOGUE512_DATA);
     aOsc2.setTable(TRIANGLE_ANALOGUE512_DATA);
     cutoff = 65;
+  }
+  else if ( startup_mode == 7 ) {
+    aOsc1.setTable(SQUARE_ANALOGUE512_DATA);
+    aOsc2.setTable(SQUARE_ANALOGUE512_DATA);
+   //envelope.setADLevels(230, 230); // square's a bit too loud so it clips
+   resonance = 130;
   }
   else {                          // no keys held
     kFilterMod.setFreq(4.0f);     // fast
