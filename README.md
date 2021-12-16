@@ -42,11 +42,14 @@ and a single resonant low-pass filter.  Also features different startup modes to
 
 ## Demos
 
+* "mozziscout_monosynth1" - Phat two-oscillator monosynth
+  <video controls src="https://user-images.githubusercontent.com/274093/146259658-660f73e4-ada4-4644-8b9a-44deefcc8644.mp4"></video>
+
 * "mozziscout_poly" - Turn Scout into a polyphonic synth, sort of
   <video controls src="https://user-images.githubusercontent.com/274093/145933351-45c38eea-6b29-4ec0-b800-44b9021e631d.mp4"></video>
 
 * "mozziscout_thx" - Make your Scout do THX Deep Note, sort of
-  <video controls src="https://user-images.githubusercontent.com/274093/145933155-d71aab6e-c19b-4d4a-ba7b-1610026e639d.mp4"></video>
+  <video controls src="https://user-images.githubusercontent.com/274093/145933155-d71aab6e-c19b-4d4a-ba7b-1610026e639d.mp4"></video>  
 
 
 ## How to mod your Scout
