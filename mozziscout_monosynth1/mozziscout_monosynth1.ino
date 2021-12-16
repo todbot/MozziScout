@@ -89,7 +89,7 @@ void updateControl() {
 
 AudioOutput_t updateAudio() {
   long asig = lpf.next( aOsc1.next() + aOsc2.next() );
-  return MonoOutput::fromNBit(16, envelope.next() * asig); // need 2 extra bits because filter resonance
+  return MonoOutput::fromNBit(16, envelope.next() * asig);
 //  return MonoOutput::fromAlmostNBit(18, envelope.next() * asig); // need 2 extra bits because filter resonance
 }
 
