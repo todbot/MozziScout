@@ -27,12 +27,14 @@ This repo shows some examples of using Mozzi on Scout, along with the small mod 
 
 - [mozziscout](mozziscout/) - a straight-forward Mozzi version of the '[scout](https://github.com/oskitone/scout/blob/main/arduino/scout/scout.ino)' sketch that comes on Scout
 
-- [mozziscout_poly](mozziscout_poly/) - a poly synth, sort of. Scout's keyboards doesn't allow true
-playing of chords, but with a slow release envelope and the playing of arpeggios, you can make chords
-
 - [mozziscout_monosynth1](mozziscout_monosynth1/) - a fat mono synth, made of two detuned oscillators
 and a single resonant low-pass filter.  Also features different startup modes to tune synth paramters.
 (see sketch for details)
+
+- [mozziscout_drums_bass](mozziscout_drums_bass/) - a 4-voice drum sample kit (bd,sd,oh,ch) and a single oscillator synth in one!
+
+- [mozziscout_poly](mozziscout_poly/) - a poly synth, sort of. Scout's keyboards doesn't allow true
+playing of chords, but with a slow release envelope and the playing of arpeggios, you can make chords
 
 - [mozziscout_wash](mozziscout_wash/) - a five-oscillator stacked chord sound based on the Mozzi example
 [Control_Oscil_Wash](https://github.com/sensorium/Mozzi/blob/master/examples/02.Control/Control_Oscil_Wash/Control_Oscil_Wash.ino)
