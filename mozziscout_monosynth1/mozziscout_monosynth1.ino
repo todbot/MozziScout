@@ -1,20 +1,20 @@
 /**
-   MozziScout wubwubwub synth using LowPassFilter16
-   based a little on Mozzi example "LowPassFilter"
-
-   This sketch has startup modes!
-   Hold a key on power up to change behavior:
-   - Hold low C for slow filter mod
-   - Hold low C# for even slower filter mod
-   - Hold low D for even SLOWER filter mod
-   - Hold low F to change wave from Saw to Triangle
-   - Hold low F# to change wave from Saw to Square
-
-   MozziScout is just like normal Scout,
-    but pins 9 & 11 are swapped, so we can use Mozzi
-
-    @todbot 14 Dec 2021
-*/
+ * MozziScout wubwubwub synth using LowPassFilter
+ * based a little on Mozzi example "LowPassFilter"
+ *
+ * This sketch has startup modes!
+ * Hold a key on power up to change behavior:
+ * - Hold low C for slow filter mod
+ *  - Hold low C# for even slower filter mod
+ *  - Hold low D for even SLOWER filter mod
+ *  - Hold low F to change wave from Saw to Triangle
+ *  - Hold low F# to change wave from Saw to Square
+ *
+ *  MozziScout is just like normal Oskitone Scout,
+ *  but pins 9 & 11 are swapped, so we can use Mozzi
+ *
+ *  @todbot 14 Dec 2021
+ **/
 
 #include <MozziGuts.h>
 #include <Oscil.h>
@@ -38,7 +38,7 @@ uint8_t cutoff = 59;     // range 0-255, corresponds to 0-8192 Hz
 int portamento_time = 50;  // milliseconds
 int env_release_time = 1000; // milliseconds
 
-byte note_offset = 48 + (octave * 12) - 36; // FIXME
+byte note_offset = 48 + (octave * 12) - 36 - 1; // FIXME
 
 // Set up keyboard
 const byte ROWS = 4;
@@ -113,17 +113,14 @@ void scanKeys() {
       Serial.print((byte)key); Serial.println(" presssed/hold");
       digitalWrite(LED_BUILTIN, HIGH);
       portamento.start(note);
-//      aOsc1.setFreq( mtof(note) ); // old way of direct set, now use portamento
-//      aOsc2.setFreq( (float)(mtof(note) * 1.01) );
+      // aOsc1.setFreq( mtof(note) ); // old way of direct set, now use portamento
+      // aOsc2.setFreq( (float)(mtof(note) * 1.01) );
       envelope.noteOn();
     }
     else if( kstate == RELEASED ) { 
       Serial.print((byte)key); Serial.println(" released");
       digitalWrite(LED_BUILTIN, LOW);
       envelope.noteOff();
-    }
-    else {
-//      Serial.print((byte)key); Serial.println(kstate);
     }
   }
 }
