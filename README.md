@@ -27,11 +27,14 @@ This repo shows some examples of using Mozzi on Scout, along with the small mod 
 
 - [mozziscout](mozziscout/) - a straight-forward Mozzi version of the '[scout](https://github.com/oskitone/scout/blob/main/arduino/scout/scout.ino)' sketch that comes on Scout
 
-- [mozziscout_monosynth1](mozziscout_monosynth1/) - a fat mono synth, made of two detuned oscillators
+- [mozziscout_monosynth1](mozziscout_monosynth1/mozziscout_monosynth1) - a fat mono synth, made of two detuned oscillators
 and a single resonant low-pass filter.  Also features different startup modes to tune synth paramters.
 (see sketch for details)
 
 - [mozziscout_drums_bass](mozziscout_drums_bass/) - a 4-voice drum sample kit (bd,sd,oh,ch) and a single oscillator synth in one!
+
+- [mozziscout_chordorgan](mozziscout_chordorgan/mozziscout_chordorgan.ino) - a 5-oscillator synth with built-in chords!
+  Sort of like [Music Thing Modular's Chord Organ](https://musicthing.co.uk/pages/chord.html). 
 
 - [mozziscout_poly](mozziscout_poly/) - a poly synth, sort of. Scout's keyboards doesn't allow true
 playing of chords, but with a slow release envelope and the playing of arpeggios, you can make chords
