@@ -38,7 +38,7 @@ uint8_t cutoff = 59;     // range 0-255, corresponds to 0-8192 Hz
 int portamento_time = 50;  // milliseconds
 int env_release_time = 1000; // milliseconds
 
-byte note_offset = 48 + (octave * 12) - 36 - 1; // FIXME
+byte note_offset = 12 + (octave * 12) - 1; // FIXME
 
 // Set up keyboard
 const byte ROWS = 4;
@@ -90,7 +90,7 @@ void updateControl() {
   uint8_t cutoff_freq = cutoff + (mod_amount * (kFilterMod.next()/2));
   lpf.setCutoffFreqAndResonance(cutoff_freq, resonance);
   envelope.update();
-  Q16n16 pf = portamento.next();
+  Q16n16 pf = portamento.next();  // Q16n16 is a fixed-point fraction in 32-bits (16bits . 16bits)
   aOsc1.setFreq_Q16n16(pf);
   aOsc2.setFreq_Q16n16(pf*1.02); // hmm, feels like this shouldn't work
 
@@ -98,7 +98,7 @@ void updateControl() {
 
 AudioOutput_t updateAudio() {
   long asig = lpf.next( aOsc1.next() + aOsc2.next() );
-  return MonoOutput::fromNBit(16, envelope.next() * asig);
+  return MonoOutput::fromNBit(16, envelope.next() * asig); // 16 = 8 signal bits + 8 envelope bits
 }
 
 void scanKeys() {
@@ -108,7 +108,7 @@ void scanKeys() {
     byte key = keys.key[i].kchar;
     byte kstate = keys.key[i].kstate;
     if ( kstate == PRESSED || kstate == HOLD ) {
-      if( millis() < 1000 ) { handleModeChange(key); }
+      if( millis() < 1000 ) { handleModeChange(key); } // mode selector!
       byte note = note_offset + key;
       Serial.print((byte)key); Serial.println(" presssed/hold");
       digitalWrite(LED_BUILTIN, HIGH);
