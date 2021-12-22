@@ -31,7 +31,7 @@
 int octave = 2;
 int detune = 50;  // 50 sounds pretty good for octave 2
 int portamento_time = 50;  // milliseconds
-int env_release_time = 1000; // milliseconds
+int env_release_time = 750; // milliseconds
 
 byte note_offset = 12 + (octave * 12) - 1; // FIXME
 
