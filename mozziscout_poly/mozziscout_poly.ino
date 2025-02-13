@@ -11,7 +11,7 @@
 
 #include <MozziGuts.h>
 #include <Oscil.h> // oscillator template
-#include <tables/cos8192_int8.h>
+#include <tables/smoothsquare8192_int8.h>
 #include <mozzi_midi.h> // for mtof()
 #include <ADSR.h>
 #include <Keypad.h>
@@ -35,12 +35,12 @@ Keypad keys = Keypad(makeKeymap(key_indexes), rowPins, colPins, ROWS, COLS);
 #define NUM_VOICES 5
 #define CONTROL_RATE 64
 
-Oscil<COS8192_NUM_CELLS, AUDIO_RATE> myOscs[ NUM_VOICES ] = {
-  Oscil<COS8192_NUM_CELLS, AUDIO_RATE>(COS8192_DATA),
-  Oscil<COS8192_NUM_CELLS, AUDIO_RATE>(COS8192_DATA),
-  Oscil<COS8192_NUM_CELLS, AUDIO_RATE>(COS8192_DATA),
-  Oscil<COS8192_NUM_CELLS, AUDIO_RATE>(COS8192_DATA),
-  Oscil<COS8192_NUM_CELLS, AUDIO_RATE>(COS8192_DATA),
+Oscil<SMOOTHSQUARE8192_NUM_CELLS, AUDIO_RATE> myOscs[ NUM_VOICES ] = {
+  Oscil<SMOOTHSQUARE8192_NUM_CELLS, AUDIO_RATE>(SMOOTHSQUARE8192_DATA),
+  Oscil<SMOOTHSQUARE8192_NUM_CELLS, AUDIO_RATE>(SMOOTHSQUARE8192_DATA),
+  Oscil<SMOOTHSQUARE8192_NUM_CELLS, AUDIO_RATE>(SMOOTHSQUARE8192_DATA),
+  Oscil<SMOOTHSQUARE8192_NUM_CELLS, AUDIO_RATE>(SMOOTHSQUARE8192_DATA),
+  Oscil<SMOOTHSQUARE8192_NUM_CELLS, AUDIO_RATE>(SMOOTHSQUARE8192_DATA),
 };
 
 // volume control envelopes
@@ -64,7 +64,8 @@ void setup() {
 
   for ( int i = 0; i < NUM_VOICES; i++) {
     myEnvs[i].setADLevels(255, 255);
-    myEnvs[i].setTimes(100, 200, 750, 750); 
+//    myEnvs[i].setTimes(100, 200, 20000, 750); 
+    myEnvs[i].setTimes(20, 50, 20000, 50); 
   }
 
   startMozzi(); // start with default control rate of 64
