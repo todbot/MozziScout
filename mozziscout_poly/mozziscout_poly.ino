@@ -64,7 +64,6 @@ void setup() {
 
   for ( int i = 0; i < NUM_VOICES; i++) {
     myEnvs[i].setADLevels(255, 255);
-//    myEnvs[i].setTimes(100, 200, 20000, 750); 
     myEnvs[i].setTimes(20, 50, 20000, 50); 
   }
 
