@@ -59,7 +59,6 @@ void blink(int count = 2, int wait = 200) {
 void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
-  keys.addEventListener(keypadEvent); // Add an event listener for this keypad
 
   blink();
 
@@ -77,55 +76,58 @@ void loop() {
 
 byte note_list[NUM_VOICES] = {0};
 
-void keypadEvent(KeypadEvent key) {
-  byte note = 60 + (octave * 12) - 36 + key; // FIXME
-  // weirdness with keypad, either because of Scout circuitry
-  // or Keypad library: new pressed keys how up as HOLD if a
-  // key is already PRESSED. Similarly, some RELEASED keys will
-  // show up as IDLE events instead. sigh.
-  switch (keys.getState()) {
-    case PRESSED:
-      Serial.print((byte)key); Serial.println(" press");
-    case HOLD:
-      Serial.print((byte)key); Serial.println(" hold");
-      for(int i=0; i<NUM_VOICES; i++) {
-        if( note_list[i] == note ) { // already pressed
-          Serial.print("ALREADY PRESSED");
-          myEnvs[i].noteOn();
-          return;
-        }
-      }
-      for(int i=0; i<NUM_VOICES; i++) { 
-        if( note_list[i]==0) { // available
-          note_list[i] = note;
-          myEnvs[i].noteOn();
-          myOscs[i].setFreq( mtof(note));
+void updateControl() {
+  String msg;
+
+  if (keys.getKeys()) {
+    for (int i = 0; i < LIST_MAX; i++) {   // Scan the whole key list.
+      if ( keys.key[i].stateChanged ) {  // Only find keys that have changed state.
+        byte note = 60 + (octave * 12) - 36 + keys.key[i].kchar;
+
+        switch (keys.key[i].kstate) {  // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
+          case PRESSED:
+            msg = " PRESSED.";
+
+            for (int i = 0; i < NUM_VOICES; i++) {
+              if (note_list[i] == note) { // already pressed
+                Serial.print("ALREADY PRESSED");
+                myEnvs[i].noteOn();
+                return;
+              }
+            }
+            for(int i = 0; i < NUM_VOICES; i++) { 
+              if (note_list[i] == 0) { // available
+                note_list[i] = note;
+                myEnvs[i].noteOn();
+                myOscs[i].setFreq(mtof(note));
+                break;
+              }
+            }
+          break;
+        case HOLD:
+          msg = " HOLD.";
+          break;
+
+        case RELEASED:
+          msg = " RELEASED.";
+
+          for(int i=0; i< NUM_VOICES; i++) { 
+            if( note == note_list[i] ) {
+              note_list[i] = 0; // say its available
+              myEnvs[i].noteOff(); 
+            }
+          }
+          break;
+        case IDLE:
+          msg = " IDLE.";
           break;
         }
+        Serial.print("Key ");
+        Serial.print((byte)keys.key[i].kchar);
+        Serial.println(msg);
       }
-      break;
-      
-    case RELEASED:
-      Serial.print((byte)key); Serial.println(" release");
-    case IDLE:
-      Serial.print((byte)key); Serial.println(" idle");
-//      for(int i=0; i< NUM_VOICES; i++) { 
-//        if( note == note_list[i] ) {
-//          note_list[i] = 0; // say its available
-//          myEnvs[i].noteOff(); 
-//        }
-//      }
-      break;
-      
-      break;
+    }
   }
-  Serial.print("note_list:"); 
-  for(int i=0; i<NUM_VOICES;i++) { Serial.print(note_list[i]); Serial.print(',');}
-  Serial.println();
-}
-
-void updateControl() {
-  keys.getKeys();
 
   for (int i = 0; i < NUM_VOICES; i++) {
     myEnvs[i].update();
