@@ -103,7 +103,7 @@ void updateControl() {
     envelope.noteOff();
   }
   else { // we have keypresses
-    byte note = 60 + (octave * 12) - 36 + buffer.getFirst(); // FIXME
+    byte note = 59 + (octave * 12) - 36 + buffer.getFirst(); // FIXME
     
     portamento1.start((byte)(note+chord_notes[0]));
     portamento2.start((byte)(note+chord_notes[1]));
